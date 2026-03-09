@@ -201,10 +201,19 @@ def get_model_metadata(model):
     if model_settings['instruction_template'] != 'Custom (obtained from model metadata)':
         model_settings['instruction_template_str'] = chat.load_instruction_template(model_settings['instruction_template'])
 
+    # Apply fallback values for keys that may not have been set
+    fallback = get_fallback_settings()
+    for k, v in fallback.items():
+        if k not in model_settings:
+            model_settings[k] = v
+
     return model_settings
 
 
 def infer_loader(model_name, model_settings, hf_quant_method=None):
+    if model_name == 'OpenAI API':
+        return 'OpenAI API'
+
     path_to_model = resolve_model_path(model_name)
     if not path_to_model.exists():
         loader = None

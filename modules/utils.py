@@ -169,7 +169,7 @@ def get_available_models():
 
     model_dirs = sorted(model_dirs, key=natural_keys)
 
-    return filtered_gguf_files + model_dirs
+    return ['OpenAI API'] + filtered_gguf_files + model_dirs
 
 
 def get_available_image_models():

@@ -22,6 +22,7 @@ def load_model(model_name, loader=None):
         'ExLlamav3': ExLlamav3_loader,
         'TensorRT-LLM': TensorRT_LLM_loader,
         'MLX': MLX_loader,
+        'OpenAI API': openai_api_loader,
     }
 
     metadata = get_model_metadata(model_name)
@@ -34,7 +35,7 @@ def load_model(model_name, loader=None):
                 logger.error('The path to the model does not exist. Exiting.')
                 raise ValueError
 
-    if loader != 'llama.cpp' and 'sampler_hijack' not in sys.modules:
+    if loader not in ('llama.cpp', 'OpenAI API') and 'sampler_hijack' not in sys.modules:
         from modules import sampler_hijack
         sampler_hijack.hijack_samplers()
 
@@ -131,6 +132,21 @@ def MLX_loader(model_name):
     return result
 
 
+def openai_api_loader(model_name):
+    try:
+        from modules.openai_api_loader import OpenAIAPIModel
+    except ImportError:
+        raise ImportError("The 'openai' package is required for the OpenAI API loader. Install it with: pip install openai")
+
+    api_url = shared.args.openai_api_url or 'http://localhost:8080'
+    api_key = shared.args.openai_api_key or ''
+    remote_model = shared.args.openai_api_model or model_name
+
+    model = OpenAIAPIModel(api_url, api_key, remote_model)
+    model.use_completions = shared.args.openai_api_use_completions
+    return model, model
+
+
 def unload_model(keep_model_name=False):
     if shared.model is None:
         return
@@ -144,12 +160,14 @@ def unload_model(keep_model_name=False):
         shared.model.stop()
     elif model_class_name == 'MLXModel':
         shared.model.unload()
+    elif model_class_name == 'OpenAIAPIModel':
+        shared.model.unload()
 
     shared.model = shared.tokenizer = None
     shared.lora_names = []
     shared.model_dirty_from_training = False
 
-    if not is_llamacpp:
+    if not is_llamacpp and model_class_name != 'OpenAIAPIModel':
         from modules.torch_utils import clear_torch_cache
         clear_torch_cache()
 

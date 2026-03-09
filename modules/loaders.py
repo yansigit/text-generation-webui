@@ -83,7 +83,13 @@ loaders_and_params = OrderedDict({
     'MLX': [
         'ctx_size',
         'cache_type',
-    ]
+    ],
+    'OpenAI API': [
+        'openai_api_url',
+        'openai_api_key',
+        'openai_api_model',
+        'openai_api_use_completions',
+    ],
 })
 
 
@@ -286,7 +292,17 @@ loaders_samplers = {
         'dynamic_temperature',
         'seed',
         'sampler_priority',
-    }
+    },
+    'OpenAI API': {
+        'temperature',
+        'top_p',
+        'presence_penalty',
+        'frequency_penalty',
+        'auto_max_new_tokens',
+        'enable_thinking',
+        'reasoning_effort',
+        'seed',
+    },
 }
 
 

@@ -169,6 +169,10 @@ def list_model_elements():
         'spec_ngram_size_m',
         'spec_ngram_min_hits',
         'mmproj',
+        'openai_api_url',
+        'openai_api_key',
+        'openai_api_model',
+        'openai_api_use_completions',
     ]
 
     return elements

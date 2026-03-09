@@ -25,7 +25,7 @@ def generate_reply(*args, **kwargs):
     state = args[1] if len(args) > 1 else kwargs.get('state', {})
     use_parallel = (
         state.get('stop_event') is not None
-        and shared.model.__class__.__name__ in ['Exllamav3Model', 'LlamaServer', 'TensorRTLLMModel']
+        and shared.model.__class__.__name__ in ['Exllamav3Model', 'LlamaServer', 'TensorRTLLMModel', 'OpenAIAPIModel']
         and (shared.model.__class__.__name__ != 'LlamaServer' or shared.args.parallel > 1)
     )
 
@@ -50,7 +50,7 @@ def _generate_reply(question, state, stopping_strings=None, is_chat=False, escap
             yield ''
             return
 
-        if shared.model.__class__.__name__ in ['LlamaServer', 'Exllamav3Model', 'TensorRTLLMModel', 'MLXModel']:
+        if shared.model.__class__.__name__ in ['LlamaServer', 'Exllamav3Model', 'TensorRTLLMModel', 'MLXModel', 'OpenAIAPIModel']:
             generate_func = generate_reply_custom
         else:
             generate_func = generate_reply_HF
@@ -125,6 +125,14 @@ def _generate_reply(question, state, stopping_strings=None, is_chat=False, escap
 def encode(prompt, add_special_tokens=True, add_bos_token=True, truncation_length=None):
     if shared.tokenizer is None:
         raise ValueError('No tokenizer is loaded')
+
+    # OpenAI API case
+    if shared.model.__class__.__name__ == 'OpenAIAPIModel':
+        input_ids = shared.tokenizer.encode(str(prompt))
+        input_ids = np.array(input_ids).reshape(1, len(input_ids))
+        if truncation_length is not None:
+            input_ids = input_ids[:, -truncation_length:]
+        return input_ids
 
     # llama.cpp case
     if shared.model.__class__.__name__ == 'LlamaServer':
@@ -225,7 +233,7 @@ def set_manual_seed(seed):
     if seed == -1:
         seed = random.randint(1, 2**31)
 
-    if shared.args.loader != 'llama.cpp':
+    if shared.args.loader not in ('llama.cpp', 'OpenAI API'):
         import torch
         from transformers import is_torch_npu_available, is_torch_xpu_available
 

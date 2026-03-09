@@ -72,7 +72,7 @@ group.add_argument('--image-quant', type=str, default=None,
 
 # Model loader
 group = parser.add_argument_group('Model loader')
-group.add_argument('--loader', type=str, help='Choose the model loader manually, otherwise, it will get autodetected. Valid options: Transformers, llama.cpp, ExLlamav3_HF, ExLlamav3, TensorRT-LLM.')
+group.add_argument('--loader', type=str, help='Choose the model loader manually, otherwise, it will get autodetected. Valid options: Transformers, llama.cpp, ExLlamav3_HF, ExLlamav3, TensorRT-LLM, OpenAI API.')
 
 # Cache
 group = parser.add_argument_group('Context and cache')
@@ -138,6 +138,13 @@ group.add_argument('--gpu-split', type=str, help='Comma-separated list of VRAM (
 group.add_argument('--enable-tp', '--enable_tp', action='store_true', help='Enable Tensor Parallelism (TP) to split the model across GPUs.')
 group.add_argument('--tp-backend', type=str, default='native', help='The backend for tensor parallelism. Valid options: native, nccl. Default: native.')
 group.add_argument('--cfg-cache', action='store_true', help='Create an additional cache for CFG negative prompts. Necessary to use CFG with that loader.')
+
+# OpenAI API
+group = parser.add_argument_group('OpenAI API')
+group.add_argument('--openai-api-url', type=str, default='', help='Base URL for the OpenAI-compatible API endpoint (e.g., http://localhost:8080 or https://api.openai.com).')
+group.add_argument('--openai-api-key', type=str, default='', help='API key for the OpenAI-compatible API endpoint.')
+group.add_argument('--openai-api-model', type=str, default='', help='Remote model name to use with the OpenAI-compatible API (e.g., gpt-4o-mini).')
+group.add_argument('--openai-api-use-completions', action='store_true', help='Use /v1/completions endpoint instead of /v1/chat/completions.')
 
 # RoPE
 group = parser.add_argument_group('RoPE')
@@ -431,6 +438,8 @@ def fix_loader_name(name):
         return 'ExLlamav3'
     elif name in ['tensorrt', 'tensorrtllm', 'tensorrt_llm', 'tensorrt-llm', 'tensort', 'tensortllm']:
         return 'TensorRT-LLM'
+    elif name in ['openai', 'openai api', 'openai_api', 'openai-api']:
+        return 'OpenAI API'
 
 
 def add_extension(name, last=False):

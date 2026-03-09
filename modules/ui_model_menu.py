@@ -48,6 +48,10 @@ def create_ui():
                             shared.gradio['cache_type'] = gr.Dropdown(label="cache-type", choices=['fp16', 'q8_0', 'q4_0', 'fp8', 'q8', 'q7', 'q6', 'q5', 'q4', 'q3', 'q2'], value=shared.args.cache_type, allow_custom_value=True, info='Valid options: llama.cpp - fp16, q8_0, q4_0; ExLlamaV3 - fp16, q2 to q8. For ExLlamaV3, you can type custom combinations for separate k/v bits (e.g. q4_q8).')
                             shared.gradio['fit_target'] = gr.Textbox(label='fit-target', value=shared.args.fit_target, info='Target VRAM margin per device for auto GPU layers (MiB). Comma-separated list for multiple devices. Default: 1024.')
                             shared.gradio['tp_backend'] = gr.Dropdown(label="tp-backend", choices=['native', 'nccl'], value=shared.args.tp_backend, info='The backend for tensor parallelism.')
+                            shared.gradio['openai_api_url'] = gr.Textbox(label='OpenAI API URL', value=shared.args.openai_api_url, info='Base URL for the OpenAI-compatible API (e.g., https://api.openai.com or http://localhost:11434)')
+                            shared.gradio['openai_api_key'] = gr.Textbox(label='OpenAI API Key', value=shared.args.openai_api_key, type='password', info='API key for authentication. Leave empty if not required.')
+                            shared.gradio['openai_api_model'] = gr.Textbox(label='Remote model name', value=shared.args.openai_api_model, info='Model name to pass in API requests (e.g., gpt-4o-mini, llama-3-70b)')
+                            shared.gradio['openai_api_use_completions'] = gr.Checkbox(label='Use /v1/completions', value=shared.args.openai_api_use_completions, info='Use the text completions endpoint instead of chat completions. Only enable if your API server supports it.')
 
                         with gr.Column():
                             shared.gradio['vram_info'] = gr.HTML(value=get_initial_vram_info())
